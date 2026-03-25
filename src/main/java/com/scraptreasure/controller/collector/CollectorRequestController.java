@@ -24,12 +24,14 @@ public class CollectorRequestController {
 
     private final CollectorRequestService collectorRequestService;
 
-   
-  @GetMapping
-public ApiResponse<List<CollectorRequestDto>> viewAvailableRequests() {
+@GetMapping
+public ApiResponse<List<CollectorRequestDto>> viewAvailableRequests(
+        Authentication authentication
+) {
+    String collectorEmail = authentication.getName();
 
     List<CollectorRequestDto> requests =
-            collectorRequestService.getAvailableRequests();
+            collectorRequestService.getAvailableRequests(collectorEmail);
 
     return ApiResponse.<List<CollectorRequestDto>>builder()
             .success(true)
@@ -39,35 +41,32 @@ public ApiResponse<List<CollectorRequestDto>> viewAvailableRequests() {
             .build();
 }
 
-   
+    @PostMapping("/{id}/accept")
+    public ResponseEntity<ApiResponse<CollectorAcceptResponseDto>> acceptRequest(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        String collectorEmail = authentication.getName();
 
-   
-   @PostMapping("/{id}/accept")
-public ResponseEntity<ApiResponse<Object>> acceptRequest(
-        @PathVariable Long id,
-        Authentication authentication
-) {
-    String collectorEmail = authentication.getName();
+        ScrapRequest request =
+                collectorRequestService.acceptRequest(id, collectorEmail);
 
-    ScrapRequest request =
-            collectorRequestService.acceptRequest(id, collectorEmail);
+        CollectorAcceptResponseDto responseDto =
+                CollectorAcceptResponseDto.builder()
+                        .requestId(request.getId())
+                        .status(request.getStatus())
+                        .collectorEmail(collectorEmail)
+                        .build();
 
-    CollectorAcceptResponseDto responseDto =
-            CollectorAcceptResponseDto.builder()
-                    .requestId(request.getId())
-                    .status(request.getStatus())
-                    .collectorEmail(collectorEmail)
-                    .build();
-
-    return ResponseEntity.ok(
-            ApiResponse.builder()
-                    .success(true)
-                    .message("Scrap request accepted successfully")
-                    .data(responseDto)
-                    .time(LocalDateTime.now())
-                    .build()
-    );
-}
+        return ResponseEntity.ok(
+                ApiResponse.<CollectorAcceptResponseDto>builder()
+                        .success(true)
+                        .message("Scrap request accepted successfully")
+                        .data(responseDto)
+                        .time(LocalDateTime.now())
+                        .build()
+        );
+    }
 
 }
 

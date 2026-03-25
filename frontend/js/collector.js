@@ -66,6 +66,12 @@ function acceptRequest(id) {
 function completePickup(id) {
     const weight = document.getElementById(`weight-${id}`).value;
 
+    
+    if (!weight || weight <= 0) {
+        alert("Please enter valid weight");
+        return;
+    }
+
     fetch(`http://localhost:8080/api/collector/pickup/${id}`, {
         method: "POST",
         headers: {

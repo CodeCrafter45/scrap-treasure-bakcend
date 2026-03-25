@@ -19,6 +19,8 @@ public class ScrapRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Double price;
+    private Double weightKg; // if using
 
     // Many requests → One client
     @JsonIgnore
